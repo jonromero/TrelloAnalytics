@@ -7,27 +7,29 @@ Jon V
 READ https://github.com/plish/Trolly for setting up your developer keys
 """
 
-import trolly
 from datetime import datetime
+import time
+import trolly
+import schedule
+import config
 
-# sudo pip install Trolly
-TRELLO_KEY = 'YOUR_KEY'
-TRELLO_TOKEN = 'YOUR_TOKEN'
-BOARD_ID = 'YOUR_BOARD_ID'
+def get_trello_data():
+    client = trolly.client.Client(config.TRELLO_KEY, config.TRELLO_TOKEN)
 
-client = trolly.client.Client(TRELLO_KEY, TRELLO_TOKEN)
+    Board = None
+    for board in client.get_boards():
+        if board.id == config.BOARD_ID:
+            Board = board
+            break
 
-Board = None
-for board in client.get_boards():
-    if board.id == BOARD_ID:
-        Board = board
-        break
-
-#DateTime, Name, LenOfTasks
-for t_list in Board.get_lists():
-    print "%s, %s, %s" % (datetime.now(), t_list.name, len(t_list.get_cards()))
+    #DateTime, Name, LenOfTasks
+    with open("data.csv", "a+") as f:
+        for t_list in Board.get_lists():
+            for card in t_list.get_cards():
+                f.write("%s, %s, %s %s\n" % (datetime.now(), t_list.name, card.id, card.name))
 
 
-
-
-
+schedule.every().day.at("23:45").do(get_trello_data)
+while True:
+    schedule.run_pending()
+    time.sleep(10)
