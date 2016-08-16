@@ -29,7 +29,7 @@ def get_trello_data():
                 f.write("%s, %s, %s %s\n" % (datetime.now(), t_list.name, card.id, card.name))
 
 
-schedule.every().day.at("23:45").do(get_trello_data)
+schedule.every().day.at("23:58").do(get_trello_data)
 while True:
     schedule.run_pending()
     time.sleep(10)
